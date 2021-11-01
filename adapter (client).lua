@@ -44,7 +44,7 @@ function Types.OnError()
 end
 
 function Types.OnClose()
-	OnMessageBindable:Fire()
+	OnCloseBindable:Fire()
 end
 
 function Types.OnMessage(data)
@@ -82,9 +82,7 @@ function WSS:Connect(url)
 end
 
 function WSS:Send(message)
-	Send("SendClient", {
-		data = message
-	})
+	Send("SendClient", message)
 end
 
 function WSS:Close(message)
