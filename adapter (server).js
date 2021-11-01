@@ -9,6 +9,8 @@ var cWs;
 // Initialize ws server
 const wsServer = new WebSocketServer({ port: 6969 });
 
+console.log('Initialized WS Server.')
+
 // Wait for connections
 wsServer.on('connection', function(ws) {
     // Connection was recieved
@@ -55,6 +57,7 @@ wsServer.on('connection', function(ws) {
     ws.on('close', function() {
         console.log('Peer disconnected.');
         cClient.close()
+        cClient = null;
     });
 });
 
@@ -67,9 +70,12 @@ function onNewClient() { // ran on client creation
         type: 'OnOpen' // send client onopen
     }));
     
-    cClient.onclose = () => cWs.send(JSON.stringify({
-        type: 'OnClose' // send when client close
-    }));
+    cClient.onclose = function () {
+        cWs.send(JSON.stringify({
+            type: 'OnClose' // send when client close
+        }));
+        cClient = null;
+    }
     
     cClient.onmessage = function(e) {
         // make sure data is string
