@@ -28,6 +28,8 @@ wsServer.on('connection', function(ws) {
     
         switch (decoded.type) {
             default:
+                if (!cClient) return;
+                console.log('Client syntax error.')
                 cClient.send(JSON.stringify({
                     type: 'Syntax',
                     data: '\'type\' is not valid.'
@@ -35,14 +37,18 @@ wsServer.on('connection', function(ws) {
                 break;
             case 'NewClient':
                 if (!data.url) return;
+                console.log('Creating new WSS.')
                 cClient = new W3CWebSocket(data.url); // create new websocket
                 onNewClient() // run onNewClient
                 break;
             case 'SendClient':
-                if (!data) return;
-                cClient.send(JSON.stringify(data)); // send client data
+                if (!data && !cClient) return;
+                console.log('Sending WSS data.')
+                cClient.send(data); // send client data
                 break;
             case 'CloseClient':
+                if (!cClient) return;
+                console.log('Closing WSS.')
                 cClient.close(); // close client
                 cClient = null;
                 break;
@@ -71,6 +77,7 @@ function onNewClient() { // ran on client creation
     }));
     
     cClient.onclose = function () {
+        console.log('WSS Closed')
         cWs.send(JSON.stringify({
             type: 'OnClose' // send when client close
         }));
@@ -80,6 +87,8 @@ function onNewClient() { // ran on client creation
     cClient.onmessage = function(e) {
         // make sure data is string
         if (typeof e.data !== 'string') return
+
+        console.log('Recieving Adapter Message')
 
         cWs.send(JSON.stringify({ // send client message
             type: 'OnMessage',
